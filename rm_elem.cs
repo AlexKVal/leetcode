@@ -3,8 +3,6 @@ using System;
 // csc rm_elem.cs && mono rm_elem.exe
 public class Solution {
     public static int RemoveElement(int[] nums, int val) {
-        if (nums.Length == 0) return 0;
-
         int indexForReplace = 0;
         for (int i = 0; i < nums.Length; ++i){
             if (nums[i] != val) {

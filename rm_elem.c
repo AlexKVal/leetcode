@@ -1,8 +1,6 @@
 #include <stdio.h>
 
 int removeElement(int* nums, int numsSize, int val){
-  if (numsSize == 0) return 0;
-
   int replace_i = 0;
   for (int i = 0; i < numsSize; ++i){
     if (nums[i] != val){

@@ -2,8 +2,6 @@
 # @param {Integer} val
 # @return {Integer}
 def remove_element(nums, val)
-  return 0 if nums.size.zero?
-
   replace_i = 0
 
   # for num in nums

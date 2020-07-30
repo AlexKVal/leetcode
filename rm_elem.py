@@ -1,8 +1,6 @@
 from typing import List
 
 def removeElement(nums: List[int], val: int) -> int:
-  if len(nums) == 0: return 0
-
   replace_i = 0
 
   for num in nums:
