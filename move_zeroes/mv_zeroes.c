@@ -1,8 +1,15 @@
 #include <stdio.h>
 
 void moveZeroes(int* nums, int numsSize){
-  int i = 0;
-  for (int j = 1; j < numsSize; j++){
+  for (int i = 0, j = 1; j < numsSize; j++){
+    if (nums[i] != 0) {
+      i++;
+    } else if (nums[j] != 0){
+      nums[i] = nums[j];
+      nums[j] = 0;
+      i++;
+    }
+
     // if (nums[i] == 0 && (nums[j] == 0) ) continue;
     // if (nums[i] == 0 && (nums[j] != 0) ){
     //   nums[i] = nums[j];
@@ -10,20 +17,11 @@ void moveZeroes(int* nums, int numsSize){
     // }
     // i++;
 
-    if (nums[i] != 0) {
-      i++;
-      continue;
-    }
-
-    if (nums[j] != 0){
-      nums[i] = nums[j];
-      nums[j] = 0;
-      i++;
-    }
-
     // if (nums[i] != 0) {
     //   i++;
-    // } else if (nums[j] != 0){
+    //   continue;
+    // }
+    // if (nums[j] != 0){
     //   nums[i] = nums[j];
     //   nums[j] = 0;
     //   i++;

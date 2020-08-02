@@ -4,8 +4,7 @@
 // i j
 // 1,0,2
 void moveZeroes(std::vector<int>& nums) {
-  int i = 0;
-  for (int j=1; j < nums.size(); ++j){
+  for (int i = 0, j = 1; j < nums.size(); ++j){
     if (nums[i] != 0){
       i++;
     } else if (nums[j] != 0){
