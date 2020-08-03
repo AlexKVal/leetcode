@@ -10,19 +10,23 @@ struct ListNode {
   ListNode(int x) : val(x), next(nullptr) {}
   ListNode(int x, ListNode *next) : val(x), next(next) {}
 
+  bool has_next() const {
+    return (next != nullptr);
+  }
+
   std::string toString() const {
     auto res = std::to_string(val);
-    if (next != nullptr) res += "->";
+    if (has_next()) res += "->";
     return res;
   }
 
   void print() const {
     auto curr = this;
-    while (curr->next != nullptr){
+    while (curr != nullptr){
       std::cout << curr->toString();
       curr = curr->next;
     }
-    std::cout << curr->toString() << std::endl;
+    std::cout << std::endl;
   }
 };
 
@@ -42,15 +46,67 @@ ListNode* buildLinkedList(std::vector<int> &nums){
 }
 
 ListNode* removeElements(ListNode* head, int val) {
+  // my 3
+  if (!head) return head;
+  auto curr = head;
+  while (curr->next){
+    if (curr->next->val == val)
+      curr->next = curr->next->next;
+    else
+      curr = curr->next;
+  }
+  if (head->val == val)
+    head = head->next;
   return head;
+
+  // // my 2
+  // if (!head) return head;
+  // for (auto curr = head, prev = curr; curr; curr = curr->next){
+  //   if (curr->val == val){
+  //     prev->next = curr->next;
+  //   } else {
+  //     prev = curr;
+  //   }
+  // }
+  // if (head->val == val)
+  //   head = head->next;
+  // return head;
+
+  // my 1
+  // for (auto curr = head, prev = curr; curr != nullptr; curr = curr->next){
+  //   if (curr->val == val){
+  //     if (curr == head){
+  //       prev = head = curr->next;
+  //     } else {
+  //       prev->next = curr->next;
+  //     }
+  //   } else {
+  //     prev = curr;
+  //   }
+  // }
+  // return head;
+
+  // // double pointer
+  // ListNode **cur = &head;
+  // while (*cur) {
+  //   if ((*cur)->val == val) {
+  //     *cur = (*cur)->next;
+  //   } else {
+  //     cur = &(*cur)->next;
+  //   }
+  // }
+  // return head;
 }
 
 // c++ -std=c++11 rm_el_ll.cpp && ./a.out
 int main(int argc, char const *argv[]){
-  std::vector<int> nums = {1,2,6,3,4,5,6}; int val = 6; // 1->2->3->4->5
+  // std::vector<int> nums = {1,2,6,3,4,5,6}; int val = 6; // 1->2->3->4->5
+  std::vector<int> nums = {1,1,2,6,3,1,4,5,6}; int val = 1; // 2,6,3,4,5,6
+  // std::vector<int> nums = {1,2}; int val = 2; // 1
   auto head = buildLinkedList(nums);
 
-  auto result = removeElements(head, 6);
+  // auto head = nullptr; int val = 1; // check for null
+  auto result = removeElements(head, val);
 
   result->print();
 
