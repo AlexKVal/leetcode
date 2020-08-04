@@ -15,23 +15,23 @@ ListNode_t* newNode(int val){
 }
 
 ListNode_t* buildLinkedList(int nums[], int numsSize){
-  puts("buildLinkedList");
+  // puts("buildLinkedList");
   ListNode_t* head = NULL;
+  if (numsSize == 0) return head;
 
-  for (int i=0; i < numsSize; i++){
-    ListNode_t* newElement = newNode(nums[i]);
+  head = newNode(nums[0]);
 
-    if (head)
-      head->next = newElement;
-    else
-      head = newElement;
+  ListNode_t* curr = head;
+  for (int i = 1; i < numsSize; i++){
+    curr->next = newNode(nums[i]);
+    curr = curr->next;
   }
 
   return head;
 }
 
 void printLinkedList(ListNode_t* head){
-  puts("printLinkedList");
+  // puts("printLinkedList");
   while (head){
     printf("%d", head->val);
     if (head->next) printf("->");
@@ -47,8 +47,8 @@ ListNode_t* removeElements(ListNode_t* head, int val){
 // clang rm_el_ll.c && ./a.out
 int main(int argc, char const *argv[]){
   // int nums[] = {1,2,6,3,4,5,6}; int val = 6; // 1->2->3->4->5
-  // int nums[] = {1,1,2,6,3,1,4,5,6}; int val = 1; // 2,6,3,4,5,6
-  int nums[] = {1,2}; int val = 2; // 1
+  int nums[] = {1,1,2,6,3,1,4,5,6}; int val = 1; // 2,6,3,4,5,6
+  // int nums[] = {1,2}; int val = 2; // 1
 
   int numsSize = sizeof(nums)/sizeof(int);
   ListNode_t* head = buildLinkedList(nums, numsSize);
