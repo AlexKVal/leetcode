@@ -41,6 +41,17 @@ void printLinkedList(ListNode_t* head){
 }
 
 ListNode_t* removeElements(ListNode_t* head, int val){
+  if (!head) return head;
+
+  ListNode_t* curr = head;
+  while (curr->next){
+    if (curr->next->val == val)
+      curr->next = curr->next->next;
+    else
+      curr = curr->next;
+  }
+  if (head->val == val) head = head->next;
+
   return head;
 }
 
@@ -54,6 +65,7 @@ int main(int argc, char const *argv[]){
   ListNode_t* head = buildLinkedList(nums, numsSize);
 
   // printLinkedList(head);
+  // ListNode_t* result = removeElements(NULL, 0); // check for null
 
   ListNode_t* result = removeElements(head, val);
 
