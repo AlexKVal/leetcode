@@ -53,6 +53,17 @@ ListNode_t* removeElements(ListNode_t* head, int val){
   if (head->val == val) head = head->next;
 
   return head;
+
+  // double pointer
+  // ListNode_t **cur = &head;
+  // while (*cur) {
+  //   if ((*cur)->val == val) {
+  //     *cur = (*cur)->next;
+  //   } else {
+  //     cur = &(*cur)->next;
+  //   }
+  // }
+  // return head;
 }
 
 // clang rm_el_ll.c && ./a.out
