@@ -3,15 +3,14 @@
 #include <string>
 
 // Definition for singly-linked list.
-struct ListNode {
+struct ListNode : public std::enable_shared_from_this<ListNode>{
   int val;
-  ListNode *next;
+  std::shared_ptr<ListNode> next;
   ListNode() : val(0), next(nullptr) {}
   ListNode(int x) : val(x), next(nullptr) {}
-  ListNode(int x, ListNode *next) : val(x), next(next) {}
 
   bool has_next() const {
-    return (next != nullptr);
+    return next != nullptr;
   }
 
   std::string toString() const {
@@ -21,7 +20,7 @@ struct ListNode {
   }
 
   void print() const {
-    auto curr = this;
+    auto curr = shared_from_this();
     while (curr != nullptr){
       std::cout << curr->toString();
       curr = curr->next;
@@ -30,22 +29,23 @@ struct ListNode {
   }
 };
 
-ListNode* buildLinkedList(std::vector<int> &nums){
-  ListNode *curr = new ListNode();
+std::shared_ptr<ListNode> buildLinkedList(std::vector<int> &nums){
+  std::shared_ptr<ListNode> curr = std::make_shared<ListNode>(); // ListNode *curr = new ListNode();
+
   auto head = curr;
 
   if (nums.size() > 0)
     curr->val = nums[0];
 
   for (int i = 1; i < nums.size(); i++){
-    curr->next = new ListNode(nums[i]);
+    curr->next = std::make_shared<ListNode>(nums[i]); // new ListNode(nums[i]);
     curr = curr->next;
   }
 
   return head;
 }
 
-ListNode* removeElements(ListNode* head, int val) {
+std::shared_ptr<ListNode> removeElements(std::shared_ptr<ListNode> head, int val) {
   // my 3
   if (!head) return head;
   auto curr = head;
