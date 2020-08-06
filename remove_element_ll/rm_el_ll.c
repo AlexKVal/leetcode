@@ -41,18 +41,18 @@ void printLinkedList(ListNode_t* head){
 }
 
 ListNode_t* removeElements(ListNode_t* head, int val){
-  if (!head) return head;
+  // if (!head) return head;
 
-  ListNode_t* curr = head;
-  while (curr->next){
-    if (curr->next->val == val)
-      curr->next = curr->next->next;
-    else
-      curr = curr->next;
-  }
-  if (head->val == val) head = head->next;
+  // ListNode_t* curr = head;
+  // while (curr->next){
+  //   if (curr->next->val == val)
+  //     curr->next = curr->next->next;
+  //   else
+  //     curr = curr->next;
+  // }
+  // if (head->val == val) head = head->next;
 
-  return head;
+  // return head;
 
   // double pointer
   // ListNode_t **cur = &head;
@@ -64,6 +64,16 @@ ListNode_t* removeElements(ListNode_t* head, int val){
   //   }
   // }
   // return head;
+
+  //
+  ListNode_t** cur = &head;
+  while (cur[0]) {
+    if (cur[0]->val == val)
+      cur[0] = cur[0]->next;
+    else
+      cur = &(cur[0]->next);
+  }
+  return head;
 }
 
 // clang rm_el_ll.c && ./a.out

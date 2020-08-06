@@ -1,0 +1,44 @@
+
+ListNode_t **cur = &head;
+while (*cur) {
+  if ((*cur)->val == val)
+    *cur = (*cur)->next;
+  else
+    cur = &(*cur)->next;
+}
+return head;
+
+(ListNode_t *head)
+ListNode_t** cur = &head;
+while (cur[0]) {
+  if (cur[0]->val == val)
+    cur[0] = cur[0]->next;
+  else
+    cur = &(cur[0]->next);
+}
+return head;
+
+
++ what is double pointer
++ step by step draw memory state
+
+**cur_dp -> **head
+cur_p = *cur_dp
+cur_p->val
+cur_p = cur_p->next
+cur_dp = &(cur_p->next)
+
+*cur = (*cur)->next // [10] = 111
+cur = &(*cur)->next // [09] = 11addr
+
+09 cur = 10addr // **cur = &head, 11addr
+10 101 head     // (*cur), 111
+11 111
+12 121
+13 131
+
+101 1, ->       // (*cur)->val:1, (*cur)->next:111
+111 2, ->
+121 3, ->
+131 4
+
