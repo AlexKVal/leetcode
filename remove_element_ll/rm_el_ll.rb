@@ -33,7 +33,15 @@ end
 # @return {ListNode}
 def remove_elements(head, val)
   return head unless head
-  #
+  cur = head
+  while cur.next
+    if cur.next.val == val
+      cur.next = cur.next.next
+    else
+      cur = cur.next
+    end
+  end
+  head = head.next if head.val == val
   return head
 end
 
