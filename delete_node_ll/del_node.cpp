@@ -32,14 +32,17 @@ ListNode* buildLL(int elements[], int size) {
     }
     return head;
 }
-
+// 4->5->1->9->3
+// 5->1->9->3
+// 1->9->3
 void deleteNode(ListNode* node) {
-    //
+    node->val = node->next->val;
+    node->next = node->next->next;
 }
 
 // c++ -std=c++11 del_node.cpp && ./a.out
 int main(int argc, char const *argv[]) {
-    int nums[]{4,5,1,9}; int node = 5;
+    int nums[]{4,5,1,9};// int node = 5;
 
     int size = sizeof(nums)/sizeof(int);
     auto head = buildLL(nums, size);
