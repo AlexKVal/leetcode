@@ -25,12 +25,22 @@ def buildLinkedList(elements: dict):
 
 # solution
 def removeElements(head: ListNode, val: int) -> ListNode:
+  if not head: return head
+  curr = head
+  while curr.next:
+    if curr.next.val == val:
+      curr.next = curr.next.next
+    else:
+      curr = curr.next
+  if head.val == val:
+    head = head.next
   return head
 
 
-# head = buildLinkedList([1,2,6,3,4,5,6]); val = 6; # 1->2->3->4->5
+head = buildLinkedList([1,2,6,3,4,5,6]); val = 6; # 1->2->3->4->5
 # head = buildLinkedList([1,1,2,6,3,1,4,5,6]); val = 1; # 2,6,3,4,5,6
-head = buildLinkedList([1,2]); val = 2; # 1
+# head = buildLinkedList([1,2]); val = 2; # 1
+# head = buildLinkedList([]); val = 0
 
 res = removeElements(head, val)
 
