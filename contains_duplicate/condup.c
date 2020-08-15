@@ -19,32 +19,35 @@ void initEntry(MapEntry* entry){
   entry->val = 0;
 }
 
-HashMap* createHashMap(void){
-  static const int hm_initial_size = 10;
+void emptyHashMap(HashMap* hashMap){
+  for(int i = 0; i < hashMap->maxSize; i++)
+    initEntry(&hashMap->map[i]);
+}
 
+HashMap* createHashMap(int maxSize){
   HashMap* instance = calloc(1, sizeof(HashMap));
-  instance->map = calloc(hm_initial_size, sizeof(MapEntry));
-  instance->maxSize = hm_initial_size;
+  instance->map = calloc(maxSize, sizeof(MapEntry));
+  instance->maxSize = maxSize;
 
   // strictly speaking this is not necessary, b/c calloc sets all to 0/false
-  for(int i = 0; i < hm_initial_size; i++)
-    initEntry(&instance->map[i]);
+  emptyHashMap(instance);
 
   return instance;
 }
 
-int hash(int key, int maxSize){
-  return (unsigned int)key % maxSize;
+MapEntry* getEntry(HashMap* hashMap, int key){
+  if (hashMap->maxSize == 0) return NULL; // guard
+  int hash = (unsigned int)key % hashMap->maxSize;
+  MapEntry* entry = &hashMap->map[hash];
+  printf("key:%d->hash:%d (t:%c k:%d v:%d)\n", key, hash, (entry->taken)?'t':'f', entry->key, entry->val);
+  return entry;
 }
 
 // returns false if not entry with key
 bool getVal(HashMap* hashMap, int key, int *val){
   if (hashMap->maxSize == 0) return false; // guard
 
-  int hash = (unsigned int)key % hashMap->maxSize;
-  MapEntry* entry = &hashMap->map[hash];
-
-  printf("key:%d->hash:%d (t:%c k:%d v:%d)\n", key, hash, (entry->taken)?'t':'f', entry->key, entry->val);
+  MapEntry* entry = getEntry(hashMap, key);
 
   if (!entry->taken || entry->key != key) return false;
 
@@ -52,17 +55,71 @@ bool getVal(HashMap* hashMap, int key, int *val){
   return true;
 }
 
+bool collision(HashMap* hashMap, int key){
+  MapEntry* entry = getEntry(hashMap, key);
+  bool result = entry->taken && (entry->key != key);
+  if (result) printf("collission for key:%d maxSize:%d\n", key, hashMap->maxSize);
+  return result;
+}
 
-bool containsDuplicate(int* nums, int numsSize){
-  HashMap* occurrences = createHashMap();
+void rehash(HashMap* hashMap){
+  int prevSize = hashMap->maxSize;
+  int newSize = prevSize * 2 - prevSize / 3 ; // * 1.7
 
-  int key = 2;
+  HashMap* newHashMap = createHashMap(newSize);
+
+  // migrate values oldMap/prevSize newMap/newSize
+  // for each existing key/value => setValue(newMap)
+
+  free(hashMap->map);
+
+  // swap hash maps
+  hashMap->map = newHashMap->map;
+  hashMap->maxSize = newHashMap->maxSize;
+}
+
+void setVal(HashMap* hashMap, int key, int val){
+  if (hashMap->maxSize == 0) return; // guard
+
+  // while(collision(hashMap, key))
+  //   rehash(hashMap);
+
+  MapEntry* entry = getEntry(hashMap, key);
+
+  if (!entry->taken){
+    entry->taken = true;
+    entry->key = key;
+  }
+
+  entry->val = val;
+}
+
+void printVal(HashMap* hashMap, int key){
   int val = 0;
-  bool exists = getVal(occurrences, key, &val);
-  if (val)
+  if (getVal(hashMap, key, &val))
     printf("key:%d found => val:%d\n", key, val);
   else
     printf("key:%d not found\n", key);
+}
+
+bool containsDuplicate(int* nums, int numsSize){
+  static const int hm_initial_size = 10;
+  HashMap* occurrences = createHashMap(hm_initial_size);
+
+  int key = 0;
+  printVal(occurrences, key);
+
+  setVal(occurrences, key, 123);
+  printVal(occurrences, key);
+
+  collision(occurrences, 100);
+
+  printf("rehash:\n");
+  rehash(occurrences);
+  printf("  size:%d\n", occurrences->maxSize);
+  rehash(occurrences);
+  printf("  size:%d\n", occurrences->maxSize);
+
 
   // for(int i = 0; i < numsSize; i++){
   //   int num = nums[i];
