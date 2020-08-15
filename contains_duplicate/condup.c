@@ -8,16 +8,16 @@ typedef struct {
   int val;
 } MapEntry;
 
-typedef struct {
-  MapEntry* map;
-  int maxSize;
-} HashMap;
-
 void initEntry(MapEntry* entry){
   entry->taken = false;
   entry->key = 0;
   entry->val = 0;
 }
+
+typedef struct {
+  MapEntry* map;
+  int maxSize;
+} HashMap;
 
 void emptyHashMap(HashMap* hashMap){
   for(int i = 0; i < hashMap->maxSize; i++)
@@ -28,16 +28,13 @@ HashMap* createHashMap(int maxSize){
   HashMap* instance = calloc(1, sizeof(HashMap));
   instance->map = calloc(maxSize, sizeof(MapEntry));
   instance->maxSize = maxSize;
-
-  // strictly speaking this is not necessary, b/c calloc sets all to 0/false
-  emptyHashMap(instance);
-
+  // emptyHashMap(instance); // unnecessary, b/c calloc sets all to 0/false
   return instance;
 }
 
 MapEntry* getEntry(HashMap* hashMap, int key){
-  if (hashMap->maxSize == 0) return NULL; // guard
-  int hash = (unsigned int)key % hashMap->maxSize;
+  if (hashMap->maxSize == 0) return NULL;
+  int hash = (unsigned int)key % hashMap->maxSize; // hash function
   MapEntry* entry = &hashMap->map[hash];
   // printf("key:%d->hash:%d (t:%c k:%d v:%d)\n", key, hash, (entry->taken)?'t':'f', entry->key, entry->val);
   return entry;
@@ -58,7 +55,7 @@ bool getVal(HashMap* hashMap, int key, int *val){
 bool collision(HashMap* hashMap, int key){
   MapEntry* entry = getEntry(hashMap, key);
   bool result = entry->taken && (entry->key != key);
-  if (result) printf("collission %d with %d\n", key, entry->key);
+  // if (result) printf("collission %d with %d\n", key, entry->key);
   return result;
 }
 
@@ -86,10 +83,10 @@ void rehash(HashMap* prevHM){
     int newSize = prevSize * 2 - prevSize / 3 ; // * 1.7
     newHM = createHashMap(newSize);
 
-    printf("rehash %d->%d\n", prevSize, newSize);
+    // printf("rehash %d->%d\n", prevSize, newSize);
     if (migrate(prevHM, newHM)) break;
 
-    printf("collision in rehash\n");
+    // printf("collision in rehash\n");
     free(newHM);
     prevSize = newSize;
   }
@@ -99,7 +96,7 @@ void rehash(HashMap* prevHM){
   // swap hash maps
   prevHM->map = newHM->map;
   prevHM->maxSize = newHM->maxSize;
-  printf("rehash successful\n");
+  // printf("rehash successful\n");
 }
 
 void setVal(HashMap* hashMap, int key, int val){
@@ -130,49 +127,17 @@ bool containsDuplicate(int* nums, int numsSize){
   static const int hm_initial_size = 10;
   HashMap* occurrences = createHashMap(hm_initial_size);
 
-  printVal(occurrences, 0);
+  for(int i = 0; i < numsSize; i++){
+    int num = nums[i];
 
-  setVal(occurrences, 0, 1);
-  setVal(occurrences, 10, 2);
-  setVal(occurrences, 100, 3);
-  setVal(occurrences, 101, 31);
-  setVal(occurrences, 102, 32);
-  setVal(occurrences, 1000, 4);
-  setVal(occurrences, 1001, 41);
-  setVal(occurrences, 1002, 42);
-  setVal(occurrences, 1004, 43);
-  setVal(occurrences, 10000, 5);
-  setVal(occurrences, 10001, 51);
-  setVal(occurrences, 100000, 6);
-  setVal(occurrences, 100001, 61);
-  setVal(occurrences, 1000000, 7);
-  setVal(occurrences, 1000001, 71);
-  setVal(occurrences, 10000000, 8);
-  setVal(occurrences, 10000001, 81);
-
-  printf("-----------\n");
-  // printVal(occurrences, 0);
-  // printVal(occurrences, 10);
-  // printVal(occurrences, 100);
-  // printVal(occurrences, 101);
-  // printVal(occurrences, 1000);
-  // printVal(occurrences, 1001);
-  // printVal(occurrences, 10000);
-  // printVal(occurrences, 10001);
-  // printVal(occurrences, 100000);
-  // printVal(occurrences, 100001);
-  // printVal(occurrences, 1000000);
-  // printVal(occurrences, 1000001);
-  // printVal(occurrences, 10000000);
-  // printVal(occurrences, 10000001);
-
-  // for(int i = 0; i < numsSize; i++){
-  //   int num = nums[i];
-  //   int key = (unsigned int)num % HM_SIZE; // hash function
-  //   occurrences[key] += 1;
-  //   // printf("num:%d key:%d val:%d\n", num, key, occurrences[key]);
-  //   if (occurrences[key] > 1) return true;
-  // }
+    int val = 1;
+    if (getVal(occurrences, num, &val)){
+      setVal(occurrences, num, ++val);
+      if (val > 1) return true;
+    } else {
+      setVal(occurrences, num, val);
+    }
+  }
 
   return false;
 }
