@@ -58,35 +58,48 @@ bool getVal(HashMap* hashMap, int key, int *val){
 bool collision(HashMap* hashMap, int key){
   MapEntry* entry = getEntry(hashMap, key);
   bool result = entry->taken && (entry->key != key);
-  if (result) printf("collission for key:%d maxSize:%d\n", key, hashMap->maxSize);
+  if (result) printf("collission %d with %d\n", key, entry->key);
   return result;
 }
 
-void rehash(HashMap* hashMap){
-  int prevSize = hashMap->maxSize;
-  int newSize = prevSize * 2 - prevSize / 3 ; // * 1.7
-  printf("rehash %d->%d\n", prevSize, newSize);
-
-  HashMap* newHashMap = createHashMap(newSize);
-
-  // migrate values oldMap/prevSize newMap/newSize
-  // no collisions detection b/c the new size is bigger than previous
-  for(int i = 0; i < hashMap->maxSize; i++){
-    MapEntry* oldEntry = &hashMap->map[i];
-
+// true - no collissions, success
+bool migrate(HashMap* oldHM, HashMap* newHM){
+  for(int i = 0; i < oldHM->maxSize; i++){
+    MapEntry* oldEntry = &oldHM->map[i];
     if (!oldEntry->taken) continue;
 
-    MapEntry* newEntry = getEntry(newHashMap, oldEntry->key);
+    if (collision(newHM, oldEntry->key)) return false;
+
+    MapEntry* newEntry = getEntry(newHM, oldEntry->key);
     newEntry->taken = true;
     newEntry->key = oldEntry->key;
     newEntry->val = oldEntry->val;
   }
+  return true;
+}
 
-  free(hashMap->map);
+void rehash(HashMap* prevHM){
+  HashMap* newHM;
+
+  int prevSize = prevHM->maxSize;
+  while (true){ // repeat until data migration success
+    int newSize = prevSize * 2 - prevSize / 3 ; // * 1.7
+    newHM = createHashMap(newSize);
+
+    printf("rehash %d->%d\n", prevSize, newSize);
+    if (migrate(prevHM, newHM)) break;
+
+    printf("collision in rehash\n");
+    free(newHM);
+    prevSize = newSize;
+  }
+
+  free(prevHM->map);
 
   // swap hash maps
-  hashMap->map = newHashMap->map;
-  hashMap->maxSize = newHashMap->maxSize;
+  prevHM->map = newHM->map;
+  prevHM->maxSize = newHM->maxSize;
+  printf("rehash successful\n");
 }
 
 void setVal(HashMap* hashMap, int key, int val){
@@ -119,15 +132,39 @@ bool containsDuplicate(int* nums, int numsSize){
 
   printVal(occurrences, 0);
 
-  setVal(occurrences, 0, 10);
-  printVal(occurrences, 0);
+  setVal(occurrences, 0, 1);
+  setVal(occurrences, 10, 2);
+  setVal(occurrences, 100, 3);
+  setVal(occurrences, 101, 31);
+  setVal(occurrences, 102, 32);
+  setVal(occurrences, 1000, 4);
+  setVal(occurrences, 1001, 41);
+  setVal(occurrences, 1002, 42);
+  setVal(occurrences, 1004, 43);
+  setVal(occurrences, 10000, 5);
+  setVal(occurrences, 10001, 51);
+  setVal(occurrences, 100000, 6);
+  setVal(occurrences, 100001, 61);
+  setVal(occurrences, 1000000, 7);
+  setVal(occurrences, 1000001, 71);
+  setVal(occurrences, 10000000, 8);
+  setVal(occurrences, 10000001, 81);
 
-  setVal(occurrences, 100, 222);
-  printVal(occurrences, 0);
-  printVal(occurrences, 100);
-
-
-
+  printf("-----------\n");
+  // printVal(occurrences, 0);
+  // printVal(occurrences, 10);
+  // printVal(occurrences, 100);
+  // printVal(occurrences, 101);
+  // printVal(occurrences, 1000);
+  // printVal(occurrences, 1001);
+  // printVal(occurrences, 10000);
+  // printVal(occurrences, 10001);
+  // printVal(occurrences, 100000);
+  // printVal(occurrences, 100001);
+  // printVal(occurrences, 1000000);
+  // printVal(occurrences, 1000001);
+  // printVal(occurrences, 10000000);
+  // printVal(occurrences, 10000001);
 
   // for(int i = 0; i < numsSize; i++){
   //   int num = nums[i];
