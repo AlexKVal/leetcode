@@ -39,7 +39,7 @@ MapEntry* getEntry(HashMap* hashMap, int key){
   if (hashMap->maxSize == 0) return NULL; // guard
   int hash = (unsigned int)key % hashMap->maxSize;
   MapEntry* entry = &hashMap->map[hash];
-  printf("key:%d->hash:%d (t:%c k:%d v:%d)\n", key, hash, (entry->taken)?'t':'f', entry->key, entry->val);
+  // printf("key:%d->hash:%d (t:%c k:%d v:%d)\n", key, hash, (entry->taken)?'t':'f', entry->key, entry->val);
   return entry;
 }
 
@@ -69,7 +69,17 @@ void rehash(HashMap* hashMap){
   HashMap* newHashMap = createHashMap(newSize);
 
   // migrate values oldMap/prevSize newMap/newSize
-  // for each existing key/value => setValue(newMap)
+  // no collisions detection b/c the new size is bigger than previous
+  for(int i = 0; i < hashMap->maxSize; i++){
+    MapEntry* oldEntry = &hashMap->map[i];
+
+    if (!oldEntry->taken) continue;
+
+    MapEntry* newEntry = getEntry(newHashMap, oldEntry->key);
+    newEntry->taken = true;
+    newEntry->key = oldEntry->key;
+    newEntry->val = oldEntry->val;
+  }
 
   free(hashMap->map);
 
@@ -97,22 +107,24 @@ void setVal(HashMap* hashMap, int key, int val){
 void printVal(HashMap* hashMap, int key){
   int val = 0;
   if (getVal(hashMap, key, &val))
-    printf("key:%d found => val:%d\n", key, val);
+    printf("%d => %d\n", key, val);
   else
-    printf("key:%d not found\n", key);
+    printf("no key:%d\n", key);
 }
 
 bool containsDuplicate(int* nums, int numsSize){
   static const int hm_initial_size = 10;
   HashMap* occurrences = createHashMap(hm_initial_size);
 
-  int key = 0;
-  printVal(occurrences, key);
+  printVal(occurrences, 0);
 
-  setVal(occurrences, key, 123);
-  printVal(occurrences, key);
+  setVal(occurrences, 0, 10);
+  printVal(occurrences, 0);
 
-  collision(occurrences, 100);
+  setVal(occurrences, 2, 222);
+  printVal(occurrences, 2);
+
+  // collision(occurrences, 100);
 
   printf("rehash:\n");
   rehash(occurrences);
@@ -120,6 +132,8 @@ bool containsDuplicate(int* nums, int numsSize){
   rehash(occurrences);
   printf("  size:%d\n", occurrences->maxSize);
 
+  printVal(occurrences, 0);
+  printVal(occurrences, 2);
 
   // for(int i = 0; i < numsSize; i++){
   //   int num = nums[i];
