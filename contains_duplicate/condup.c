@@ -65,6 +65,7 @@ bool collision(HashMap* hashMap, int key){
 void rehash(HashMap* hashMap){
   int prevSize = hashMap->maxSize;
   int newSize = prevSize * 2 - prevSize / 3 ; // * 1.7
+  printf("rehash %d->%d\n", prevSize, newSize);
 
   HashMap* newHashMap = createHashMap(newSize);
 
@@ -91,8 +92,8 @@ void rehash(HashMap* hashMap){
 void setVal(HashMap* hashMap, int key, int val){
   if (hashMap->maxSize == 0) return; // guard
 
-  // while(collision(hashMap, key))
-  //   rehash(hashMap);
+  while(collision(hashMap, key))
+    rehash(hashMap);
 
   MapEntry* entry = getEntry(hashMap, key);
 
@@ -121,19 +122,12 @@ bool containsDuplicate(int* nums, int numsSize){
   setVal(occurrences, 0, 10);
   printVal(occurrences, 0);
 
-  setVal(occurrences, 2, 222);
-  printVal(occurrences, 2);
-
-  // collision(occurrences, 100);
-
-  printf("rehash:\n");
-  rehash(occurrences);
-  printf("  size:%d\n", occurrences->maxSize);
-  rehash(occurrences);
-  printf("  size:%d\n", occurrences->maxSize);
-
+  setVal(occurrences, 100, 222);
   printVal(occurrences, 0);
-  printVal(occurrences, 2);
+  printVal(occurrences, 100);
+
+
+
 
   // for(int i = 0; i < numsSize; i++){
   //   int num = nums[i];
