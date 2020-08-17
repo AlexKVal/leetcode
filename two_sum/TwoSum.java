@@ -4,20 +4,16 @@ import java.util.Map;
 
 class TwoSum {
   public static int[] twoSum(int[] nums, int target) {
-    Map<Integer, Integer> complements = new HashMap<Integer, Integer>(nums.length);
+    Map<Integer, Integer> numToIndex = new HashMap<Integer, Integer>(nums.length);
 
     for (int i = 0; i < nums.length; i++){
       int num = nums[i];
       int complement = target - num;
 
-      if (!complements.containsKey(complement))
-        complements.put(complement, i);
+      if (numToIndex.containsKey(complement))
+        return new int[] {numToIndex.get(complement), i};
 
-      if (complements.containsKey(num)){
-        int firstIndex = complements.get(num);
-        if (firstIndex != i)
-          return new int[]{firstIndex, i};
-      }
+      numToIndex.put(num, i);
     }
     return new int[0];
   }
