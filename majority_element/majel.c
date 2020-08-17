@@ -2,25 +2,36 @@
 #include <stdlib.h>
 
 int majorityElement(int* nums, int numsSize){
-  int half = numsSize / 2;
+  // int half = numsSize / 2;
 
-  // HashMap table, x4 to mitigate the hash key collisions
-  int hashTableSize = 1000;
-  if (hashTableSize < numsSize) hashTableSize = numsSize * 4;
-  int *numOccurrences = calloc(hashTableSize, sizeof(int));
+  // // HashMap table, x4 to mitigate the hash key collisions
+  // int hashTableSize = 1000;
+  // if (hashTableSize < numsSize) hashTableSize = numsSize * 4;
+  // int *numOccurrences = calloc(hashTableSize, sizeof(int));
 
-  // solution
+  // // solution
+  // for(int i = 1; i < numsSize; i++){
+  //   int num = nums[i];
+  //   int key = (unsigned int)num % hashTableSize;
+  //   if (numOccurrences[key] == 0)
+  //     numOccurrences[key] = 1;
+  //   else
+  //     numOccurrences[key] += 1;
+  //   if (numOccurrences[key] > half) return num;
+  // }
+
+  // return nums[0]; // for 2 elements arrays
+
+  // Boyer-Moor
+  if (numsSize == 0) return 0; // guard against []
+  int candidate = nums[0]; // b/c C has no nill value that is different to 0
+  int votes = 1;
   for(int i = 1; i < numsSize; i++){
     int num = nums[i];
-    int key = (unsigned int)num % hashTableSize;
-    if (numOccurrences[key] == 0)
-      numOccurrences[key] = 1;
-    else
-      numOccurrences[key] += 1;
-    if (numOccurrences[key] > half) return num;
+    if (votes == 0) candidate = num;
+    votes += (num == candidate) ? +1 : -1;
   }
-
-  return nums[0]; // for 2 elements arrays
+  return candidate;
 }
 
 // clang majel.c && ./a.out
