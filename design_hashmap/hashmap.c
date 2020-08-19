@@ -1,16 +1,18 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
+
+#define initialCapacity 8
 
 #define NONTAKEN -1
 
-typedef struct _MapEntry {
+typedef struct {
   int key;
   int value;
-  struct _MapEntry* next;
 } MapEntry;
 
 typedef struct {
-  MapEntry* buckets;
+  MapEntry* entries;
   int entriesInUse;
   int maxEntries;
 } MyHashMap;
@@ -18,77 +20,144 @@ typedef struct {
 /** Initialize your data structure here. */
 void myHashMapInit(MyHashMap* obj){
   for(int i = 0; i < obj->maxEntries; i++)
-    obj->buckets[i].key = NONTAKEN;
+    obj->entries[i].key = NONTAKEN;
 }
 
-MyHashMap* myHashMapCreate() {
+MyHashMap* newHashMap(int capacity) {
   MyHashMap* instance = calloc(1, sizeof(MyHashMap));
-  static const int startCapacity = 16;
-  instance->buckets = calloc(startCapacity, sizeof(MapEntry));
-  instance->maxEntries = startCapacity;
+  instance->entries = calloc(capacity, sizeof(MapEntry));
+  instance->maxEntries = capacity;
   instance->entriesInUse = 0;
   myHashMapInit(instance);
   return instance;
 }
 
-MapEntry* getEntry(MyHashMap* obj, int key){
-  int hash = abs(key) % obj->maxEntries;
-  return &obj->buckets[hash];
+MyHashMap* myHashMapCreate() {
+  return newHashMap(initialCapacity);
+}
+
+int hash(int key, int size){
+  return abs(key) % size;
+}
+
+// TODO set needResizing when shift is > 3
+// true - success, false - not set
+bool setValue(MyHashMap* obj, int key, int value){
+  int entryIndex = hash(key, obj->maxEntries);
+  int shouldBeIndex = entryIndex;
+
+  // open addressing
+  while (entryIndex < obj->maxEntries){
+    MapEntry* entry = &obj->entries[entryIndex];
+
+    if (entry->key == NONTAKEN){
+      entry->key = key;
+      entry->value = value;
+      obj->entriesInUse += 1;
+      if (shouldBeIndex != entryIndex)
+        printf(" setting %d shifted +%d\n", key, entryIndex - shouldBeIndex);
+      return true;
+    }
+
+    if (entry->key == key){
+      entry->value = value;
+      return true;
+    }
+
+    entryIndex++;
+  }
+  return false;
+}
+
+// true - success
+bool migrate(MyHashMap* oldHM, MyHashMap* newHM){
+  for(int i = 0; i < oldHM->maxEntries; i++){
+    MapEntry* entry = &oldHM->entries[i];
+    if (entry->key == NONTAKEN) continue;
+    bool success = setValue(newHM, entry->key, entry->value);
+    if (!success) return false;
+  }
+  return true;
+}
+
+void rehash(MyHashMap* obj){
+  MyHashMap* newMap;
+
+  int prevCapacity = obj->maxEntries;
+  while(true){
+    int newCapacity = prevCapacity * 2;
+    newMap = newHashMap(newCapacity);
+
+    printf(" rehash %d->%d\n", prevCapacity, newCapacity);
+    bool success = migrate(obj, newMap);
+    if (success) break;
+
+    puts(" collision in rehash");
+    free(newMap);
+    prevCapacity = newCapacity;
+  }
+
+  // swap
+  free(obj->entries);
+  obj->entries = newMap->entries;
+  obj->maxEntries = newMap->maxEntries;
+  puts(" rehash successful");
 }
 
 /** value will always be non-negative. */
 void myHashMapPut(MyHashMap* obj, int key, int value) {
-  MapEntry* entry = getEntry(obj, key);
-  MapEntry* prev = entry;
-  if () ...
+  printf("try putting %d=>%d\n", key, value);
+  // rehash at >50% capacity
+  if (obj->entriesInUse > obj->maxEntries/2) rehash(obj);
 
-  while (entry){
-    if (entry->key == key){ // update existing
-      entry->value = value;
-      return;
-    }
-    prev = entry;
-    entry = entry->next;
+  while(!setValue(obj, key, value)){
+    puts("need rehash");
+    rehash(obj);
   }
-  prev->next = calloc(1, sizeof(MapEntry));
-
-  entry->key = key;
-  obj->entriesInUse += 1;
+  puts("put success");
 }
 
 // Returns the value to which the specified key is mapped,
 // or -1 if this map contains no mapping for the key
+#define NOMAPPING -1
 int myHashMapGet(MyHashMap* obj, int key) {
-  return -1;
+  int entryIndex = hash(key, obj->maxEntries);
+  int shouldBeIndex = entryIndex;
+
+  // open addressing
+  while (entryIndex < obj->maxEntries){
+    MapEntry* entry = &obj->entries[entryIndex];
+
+    if (entry->key == NONTAKEN) return NOMAPPING;
+    if (entry->key == key){
+      if (shouldBeIndex != entryIndex)
+        printf(" getting %d probed +%d\n", key, entryIndex - shouldBeIndex);
+      return entry->value;
+    }
+
+    entryIndex++;
+  }
+
+  return NOMAPPING;
 }
 
 /** Removes the mapping of the specified value key if this map contains a mapping for the key */
 void myHashMapRemove(MyHashMap* obj, int key) {
-
+  // TODO
 }
 
 void myHashMapFree(MyHashMap* obj) {
-  for(int i = 0; i < obj->entriesInUse; i++){
-    MapEntry* entry = &obj->buckets[i];
-    while(entry->next){ // linked lists are dynamically allocated
-      MapEntry* nextNext = entry->next->next;
-      free(entry->next);
-      entry->next = nextNext;
-    }
-  }
-  free(obj->buckets);
+  free(obj->entries);
   free(obj);
 }
 
 void printHashMap(MyHashMap* obj){
+  puts("== state ==");
   printf("entries: %d\n", obj->entriesInUse);
   for(int i = 0; i < obj->maxEntries; i++){
-    MapEntry* entry = &obj->buckets[i];
-    while(entry){
-      if(entry->key != NONTAKEN)
-        printf("%d=>%d\n", entry->key, entry->value);
-      entry = entry->next;
-    }
+    MapEntry* entry = &obj->entries[i];
+    if(entry->key != NONTAKEN)
+      printf(" %d %d=>%d\n", i, entry->key, entry->value);
   }
 }
 
@@ -96,10 +165,31 @@ void printHashMap(MyHashMap* obj){
 int main(int argc, char const *argv[]){
   MyHashMap* map = myHashMapCreate();
 
-  myHashMapPut(map, 2, 22);
-  myHashMapPut(map, 13, 130);
-  myHashMapPut(map, 22, 220);
+  puts("== writing ==");
+  // myHashMapPut(map, 1, 11);
+  // myHashMapPut(map, 2, 22);
+  // myHashMapPut(map, 2, 222); // update
+  // myHashMapPut(map, 17, 17);
+  // myHashMapPut(map, 3, 33);
+  // myHashMapPut(map, 4, 44);
+  // myHashMapPut(map, 8, 88);
+
+  // test need rehash
+  // myHashMapPut(map, 2, 22);
+  // myHashMapPut(map, 3, 33);
+  // myHashMapPut(map, 7, 77);
+  // printHashMap(map);
+
+  // collision in rehash - hard to get
+  myHashMapPut(map, 22, 22);
+  myHashMapPut(map, 14, 14);
+  myHashMapPut(map, 15, 15);
   printHashMap(map);
+
+  // puts("== reading ==");
+  // printf("1: %d\n", myHashMapGet(map, 1));
+  // printf("2: %d\n", myHashMapGet(map, 2));
+  // printf("17: %d\n", myHashMapGet(map, 17));
 
   myHashMapFree(map);
 
