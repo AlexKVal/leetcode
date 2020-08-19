@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-#define initialCapacity 8
+#define initialCapacity 4
 #define NONTAKEN -1
 
 typedef struct {
@@ -168,11 +168,20 @@ void myHashMapRemove(MyHashMap* obj, int key) {
 
     int shouldBeIndex = hash(entry->key, obj->maxEntries);
     if (entryIndex != shouldBeIndex){
-      printf(" unshifting %d %d<<%d\n", entry->key, entryIndex - 1, entryIndex);
+      MapEntry* shouldBeEntry = &obj->entries[shouldBeIndex];
       MapEntry* prevEntry = &obj->entries[entryIndex - 1];
-      prevEntry->key = entry->key;
-      prevEntry->value = entry->value;
-      entry->key = NONTAKEN;
+      if (shouldBeEntry->key == NONTAKEN){
+        printf(" move %d to should-be %d<-%d\n", entry->key, shouldBeIndex, entryIndex);
+        shouldBeEntry->key = entry->key;
+        shouldBeEntry->value = entry->value;
+        entry->key = NONTAKEN;
+      } else if (prevEntry->key == NONTAKEN){
+        printf(" unshifting %d %d<<%d\n", entry->key, entryIndex - 1, entryIndex);
+        prevEntry->key = entry->key;
+        prevEntry->value = entry->value;
+        entry->key = NONTAKEN;
+      }
+      printf(" nowhere to shift %d\n", entry->key);
     }
 
     entryIndex++;
@@ -202,9 +211,10 @@ int main(int argc, char const *argv[]){
   myHashMapPut(map, 1, 11);
   myHashMapPut(map, 2, 22);
   myHashMapPut(map, 2, 222); // update
+  myHashMapPut(map, 6, 66);
   myHashMapPut(map, 17, 17);
   myHashMapPut(map, 18, 18);
-  myHashMapPut(map, 19, 19);
+  // myHashMapPut(map, 19, 19);
   // puts("== reading ==");
   // printf("1: %d\n", myHashMapGet(map, 1));
   // printf("2: %d\n", myHashMapGet(map, 2));
@@ -213,8 +223,13 @@ int main(int argc, char const *argv[]){
   // printf("19: %d\n", myHashMapGet(map, 19));
   printHashMap(map);
   puts("== deleting ==");
-  myHashMapRemove(map, 17);
+  // myHashMapRemove(map, 17);
   myHashMapRemove(map, 18);
+  myHashMapPut(map, 4, 44);
+  myHashMapRemove(map, 19);
+  myHashMapPut(map, 19, 19);
+  myHashMapPut(map, 20, 20);
+  printHashMap(map);
   myHashMapRemove(map, 19);
   printHashMap(map);
 
