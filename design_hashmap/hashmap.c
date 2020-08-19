@@ -153,35 +153,12 @@ void myHashMapRemove(MyHashMap* obj, int key) {
       entry->key = NONTAKEN;
       if (shouldBeIndex != entryIndex)
         printf(" found at +%d\n", entryIndex - shouldBeIndex);
-      break;
-    }
-
-    entryIndex++;
-  }
-
-  // check for the next keys if they were shifted and unshift them
-  entryIndex++;
-  while (entryIndex < obj->maxEntries){
-    MapEntry* entry = &obj->entries[entryIndex];
-
-    if (entry->key == NONTAKEN) break;
-
-    int shouldBeIndex = hash(entry->key, obj->maxEntries);
-    if (entryIndex != shouldBeIndex){
-      MapEntry* shouldBeEntry = &obj->entries[shouldBeIndex];
-      MapEntry* prevEntry = &obj->entries[entryIndex - 1];
-      if (shouldBeEntry->key == NONTAKEN){
-        printf(" move %d to should-be %d<-%d\n", entry->key, shouldBeIndex, entryIndex);
-        shouldBeEntry->key = entry->key;
-        shouldBeEntry->value = entry->value;
-        entry->key = NONTAKEN;
-      } else if (prevEntry->key == NONTAKEN){
-        printf(" unshifting %d %d<<%d\n", entry->key, entryIndex - 1, entryIndex);
-        prevEntry->key = entry->key;
-        prevEntry->value = entry->value;
-        entry->key = NONTAKEN;
-      }
-      printf(" nowhere to shift %d\n", entry->key);
+      puts("rehash w/o resizing");
+      MyHashMap* newMap = newHashMap(obj->maxEntries);
+      migrate(obj, newMap);
+      free(obj->entries);
+      obj->entries = newMap->entries;
+      return;
     }
 
     entryIndex++;
