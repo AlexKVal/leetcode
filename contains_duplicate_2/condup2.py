@@ -1,18 +1,9 @@
 def containsNearbyDuplicate(nums, k):
 	kSet = set()
 	for i, num in enumerate(nums):
-		outOfSet = i - k - 1
-		# print("outOfSet:", outOfSet)
-		if outOfSet >= 0:
-			numOut = nums[outOfSet]
-			# print("discard:", numOut)
-			kSet.discard(numOut)
-
+		if len(kSet) > k: kSet.discard(nums[i - k - 1])
 		if num in kSet: return True
-
-		# print("add:", num)
 		kSet.add(num)
-		# print("set:", kSet)
 	return False
 
 
